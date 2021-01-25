@@ -1,7 +1,9 @@
+const cors = require("cors");
 const dotenv = require("dotenv");
 const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
+
 const userRoute = require("./src/api/components/user/route");
 
 dotenv.config();
@@ -11,6 +13,8 @@ mongoose.connect(process.env.DB_URI, { useNewUrlParser: true }); // eslint-disab
 
 const app = express();
 const port = process.env.PORT || 8000; // eslint-disable-line no-undef
+
+app.use(cors());
 
 app.use(morgan("tiny"));
 
