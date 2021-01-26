@@ -3,6 +3,40 @@ const EmailService = require("../../../services/email");
 const JwtService = require("../../../services/jwt");
 const UserService = require("./service");
 
+async function checkAdmin(req, res) {
+  try {
+    // read user id from request paramters
+    const uid = req.body.id;
+    // validate user id
+    if (!uid) {
+      return res.json({
+        status: "INVALID_REQUEST",
+        message: "User ID is missing.",
+      });
+    }
+    const userFromDb = await UserService.readUserById(uid);
+    if (!userFromDb) {
+      return res.json({
+        status: "ZERO_RESULTS",
+        message: "No account is associated with this email.",
+      });
+    }
+    return res.json({
+      status: "OK",
+      result: {
+        isAdmin: userFromDb.roles.includes("admin"),
+      },
+      message: `This user is ${userFromDb.roles.includes("admin") ? "" : "not"
+        } an admin.`,
+    });
+  } catch (e) {
+    return res.json({
+      status: "UNKNOWN_ERROR",
+      message: "Internal Server Error",
+    });
+  }
+}
+
 async function createUser(req, res) {
   try {
     const newUser = req.body;
@@ -159,7 +193,10 @@ async function login(req, res) {
     // send response back to the client
     return res.json({
       status: "OK",
-      result: { token },
+      result: {
+        token,
+        roles: userFromDb.roles,
+      },
     });
   } catch (e) {
     return res.json({
@@ -512,6 +549,7 @@ async function verifyEmail(req, res) {
 }
 
 module.exports = {
+  checkAdmin,
   createUser,
   deleteUser,
   getEmailFromPasswordResetToken,

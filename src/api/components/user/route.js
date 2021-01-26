@@ -41,5 +41,8 @@ router
     AccessService.isAdmin,
     UserController.removeAdmin
   );
+router
+  .route("/admin/get")
+  .post(AuthService.checkLogin, UserController.checkAdmin);
 
 module.exports = router;
