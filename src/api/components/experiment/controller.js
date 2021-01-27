@@ -132,7 +132,7 @@ async function updateExperiment(req, res) {
     );
     return res.json({
       status: "OK",
-      result: updateResult,
+      result: { _id, ...updateDoc },
       message: "Experiments have been saved successfully.",
     });
   } catch (e) {
