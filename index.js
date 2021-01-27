@@ -26,6 +26,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/experiment", experimentRoute);
 
+app.get("/", (req, res) => {
+  res.send("Brain and Music Lab backend is running");
+});
+
 app.listen(port, () => {
   console.log(`App is listening on port ${port}`); // eslint-disable-line no-console
 });
