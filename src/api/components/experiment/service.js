@@ -1,5 +1,4 @@
 const Experiment = require("./model");
-const mongoose = require("mongoose");
 
 function createExperiment(exp) {
   const newExp = new Experiment(exp);
