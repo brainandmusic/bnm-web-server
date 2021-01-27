@@ -126,11 +126,13 @@ async function updateExperiment(req, res) {
     !req.body.experimentId && (updateDoc.creator = req.body.id);
     delete updateDoc.id;
 
-    console.log(`update _id is ${req.body.experimentId}`);
-    await ExperimentService.updateExperimentById(_id, updateDoc);
+    const updateResult = await ExperimentService.updateExperimentById(
+      _id,
+      updateDoc
+    );
     return res.json({
       status: "OK",
-      result: { _id, ...updateDoc },
+      result: updateResult,
       message: "Experiments have been saved successfully.",
     });
   } catch (e) {
