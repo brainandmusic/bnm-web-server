@@ -26,7 +26,7 @@ router
 router.route("/resetPassword").post(UserController.resetPassword);
 
 // profile related
-router.route("/profile").get(AuthService.checkLogin, UserController.readUser);
+router.route("/profile").post(AuthService.checkLogin, UserController.readUser);
 router.route("/profile").put(AuthService.checkLogin, UserController.updateUser);
 
 // TODO: add as admin, remove admin
