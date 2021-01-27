@@ -10,6 +10,7 @@ const experimentRoute = require("./src/api/components/experiment/route");
 dotenv.config();
 
 mongoose.set("useUnifiedTopology", true);
+mongoose.set("useFindAndModify", false);
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true }); // eslint-disable-line no-undef
 
 const app = express();

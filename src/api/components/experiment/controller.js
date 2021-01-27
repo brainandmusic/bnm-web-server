@@ -1,6 +1,5 @@
-const { deleteUserById } = require("../user/service");
-const Experiment = require("./model");
 const ExperimentService = require("./service");
+const mongoose = require("mongoose");
 
 async function createExperiment(req, res) {
   try {
@@ -74,6 +73,32 @@ async function deleteExperiment(req, res) {
   }
 }
 
+async function readExperiment(req, res) {
+  try {
+    // read experiment Id from request
+    const experimentId = req.body.experimentId;
+    if (!experimentId) {
+      return res.json({
+        status: "INVALID_REQUEST",
+        message: "Experiment ID is missing.",
+      });
+    }
+    const experimentsFromDb = await ExperimentService.readExperimentById(
+      experimentId
+    );
+    return res.json({
+      status: "OK",
+      result: experimentsFromDb,
+      message: "Experiment have been retrieved successfully.",
+    });
+  } catch (e) {
+    return res.json({
+      status: "INTERNAL_ERROR",
+      message: e.message,
+    });
+  }
+}
+
 async function readExperimentCards(req, res) {
   try {
     const experimentsFromDb = await ExperimentService.readExperimentCards();
@@ -90,8 +115,37 @@ async function readExperimentCards(req, res) {
   }
 }
 
+async function updateExperiment(req, res) {
+  try {
+    // read experiment ID and data from request body
+    const _id = req.body.experimentId
+      ? mongoose.Types.ObjectId(req.body.experimentId)
+      : mongoose.Types.ObjectId();
+    // const updateDoc = JSON.parse(req.body.updateDoc);
+    const updateDoc = req.body;
+    !req.body.experimentId && (updateDoc.creator = req.body.id);
+    delete updateDoc.id;
+
+    console.log(`update _id is ${req.body.experimentId}`);
+    await ExperimentService.updateExperimentById(_id, updateDoc);
+    return res.json({
+      status: "OK",
+      result: { _id, ...updateDoc },
+      message: "Experiments have been saved successfully.",
+    });
+  } catch (e) {
+    return res.json({
+      status: "INTERNAL_ERROR",
+      result: e,
+      message: e.message,
+    });
+  }
+}
+
 module.exports = {
   createExperiment,
   deleteExperiment,
+  readExperiment,
   readExperimentCards,
+  updateExperiment,
 };

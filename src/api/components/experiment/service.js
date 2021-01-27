@@ -1,4 +1,5 @@
 const Experiment = require("./model");
+const mongoose = require("mongoose");
 
 function createExperiment(exp) {
   const newExp = new Experiment(exp);
@@ -10,6 +11,11 @@ function deleteExperimentById(id) {
   return Experiment.deleteOne(conditions);
 }
 
+function readExperimentById(id) {
+  const conditions = { _id: id };
+  return Experiment.findOne(conditions);
+}
+
 function readExperimentCards(
   filter = {},
   projection = { data: 0 },
@@ -18,8 +24,21 @@ function readExperimentCards(
   return Experiment.find(filter, projection, options);
 }
 
+function updateExperimentById(id, updateDoc) {
+  return Experiment.findOneAndUpdate(
+    { _id: id },
+    { $set: updateDoc },
+    {
+      upsert: true,
+      returnNewDocument: true,
+    }
+  );
+}
+
 module.exports = {
   createExperiment,
   deleteExperimentById,
+  readExperimentById,
   readExperimentCards,
+  updateExperimentById,
 };
