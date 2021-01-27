@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 
 const userRoute = require("./src/api/components/user/route");
+const experimentRoute = require("./src/api/components/experiment/route");
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/experiment", experimentRoute);
 
 app.listen(port, () => {
   console.log(`App is listening on port ${port}`); // eslint-disable-line no-console
