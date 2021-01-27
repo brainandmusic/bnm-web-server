@@ -24,7 +24,7 @@ const experimentSchema = new Schema({
     required: true,
   },
   data: {
-    type: Object,
+    type: String,
     required: true,
   },
 });
