@@ -2,13 +2,9 @@ const StudyService = require("./service");
 
 async function createStudy(req, res) {
   try {
-    const study = {};
     // read study info from request
-    study.name = req.body.name;
-    study.description = req.body.description;
+    const study = req.body;
     study.creator = req.body.id;
-    study.members = req.body.members || [];
-    study.experiments = req.body.experiments || [];
     // validate study name
     if (!study.name) {
       return res.json({

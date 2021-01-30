@@ -10,6 +10,11 @@ const studySchema = new Schema({
   description: {
     type: String,
   },
+  status: {
+    type: String,
+    enum: ["private", "public"],
+    required: true,
+  },
   createDate: {
     type: Date,
     required: true,
