@@ -6,6 +6,7 @@ const morgan = require("morgan");
 
 const userRoute = require("./src/api/components/user/route");
 const experimentRoute = require("./src/api/components/experiment/route");
+const studyRoute = require("./src/api/components/study/route");
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/experiment", experimentRoute);
+app.use("/api/v1/study", studyRoute);
 
 app.get("/", (req, res) => {
   res.send("Brain and Music Lab backend is running");

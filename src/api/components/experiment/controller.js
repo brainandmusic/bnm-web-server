@@ -126,10 +126,7 @@ async function updateExperiment(req, res) {
     !req.body.experimentId && (updateDoc.creator = req.body.id);
     delete updateDoc.id;
 
-    const updateResult = await ExperimentService.updateExperimentById(
-      _id,
-      updateDoc
-    );
+    await ExperimentService.updateExperimentById(_id, updateDoc);
     return res.json({
       status: "OK",
       result: { _id, ...updateDoc },
