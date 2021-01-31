@@ -12,6 +12,10 @@ function deleteUserById(id) {
   return User.deleteOne(conditions);
 }
 
+function readUsers(filter, projection) {
+  return User.find(filter, projection);
+}
+
 function readUserByEmail(email) {
   return User.findOne({ email });
 }
@@ -36,6 +40,7 @@ function updateUserById(id, doc) {
 module.exports = {
   createUser,
   deleteUserById,
+  readUsers,
   readUserByEmail,
   readUserById,
   readUserByPasswordResetToken,

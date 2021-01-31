@@ -25,6 +25,14 @@ router
   .post(UserController.getEmailFromPasswordResetToken);
 router.route("/resetPassword").post(UserController.resetPassword);
 
+// get multiple users' information
+router
+  .route("/get")
+  .post(
+    AuthService.checkLogin,
+    AccessService.isAdmin,
+    UserController.readUsers
+  );
 // profile related
 router.route("/profile").post(AuthService.checkLogin, UserController.readUser);
 router.route("/profile").put(AuthService.checkLogin, UserController.updateUser);

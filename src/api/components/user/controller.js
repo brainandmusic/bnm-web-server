@@ -152,6 +152,25 @@ async function getEmailFromPasswordResetToken(req, res) {
   }
 }
 
+async function readUsers(req, res) {
+  try {
+    // read filter, projection from request paramters
+    const filter = JSON.parse(req.body.filter || {});
+    const projection = JSON.parse(req.body.projection || {});
+    const readResult = await UserService.readUsers(filter, projection);
+    // send response back to the client
+    return res.json({
+      status: "OK",
+      result: readResult,
+    });
+  } catch (e) {
+    return res.json({
+      status: "INTERNAL_ERROR",
+      message: e.message,
+    });
+  }
+}
+
 async function login(req, res) {
   try {
     // read user credentials from request body
@@ -556,6 +575,7 @@ module.exports = {
   login,
   logout,
   readUser,
+  readUsers,
   removeAdmin,
   resetPassword,
   sendForgetPasswordEmail,
