@@ -27,6 +27,9 @@ const studySchema = new Schema({
   members: [
     {
       id: mongoose.Types.ObjectId,
+      firstName: String,
+      lastName: String,
+      email: String,
     },
   ],
   experiments: [
