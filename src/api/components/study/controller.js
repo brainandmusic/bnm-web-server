@@ -28,11 +28,10 @@ async function createStudy(req, res) {
   }
 }
 
-async function getStudies(req, res) {
+async function deleteStudies(req, res) {
   try {
     // read filter from request
-    let filter = req.body.filter || {};
-    let projection = req.body.projection || {};
+    let filter = req.body.filter;
     // validate filter
     if (!filter) {
       return res.json({
@@ -41,6 +40,31 @@ async function getStudies(req, res) {
       });
     }
 
+    const deleteResutl = await StudyService.deleteStudies(filter);
+    // send response back to the client
+    return res.json({
+      status: "OK",
+      result: deleteResutl,
+      message: "Studies have been deleted successfully.",
+    });
+  } catch (e) {
+    return res.json({
+      status: "INTERNAL_ERROR",
+      message: e.message,
+    });
+  }
+}
+
+async function getStudies(req, res) {
+  try {
+    // read filter from request
+    let filter = req.body.filter || {};
+    let projection = req.body.projection || {};
+    const projectionKeys = Object.keys(projection);
+    for (let i = 0; i < projectionKeys.length; i += 1) {
+      const key = projectionKeys[i];
+      projection[key] = parseInt(projection[key]);
+    }
     const studiesFromDb = await StudyService.readStudies(filter, projection);
     if (!studiesFromDb) {
       return res.json({
@@ -64,5 +88,6 @@ async function getStudies(req, res) {
 
 module.exports = {
   createStudy,
+  deleteStudies,
   getStudies,
 };
