@@ -86,8 +86,30 @@ async function getStudies(req, res) {
   }
 }
 
+async function updateStudy(req, res) {
+  try {
+    // read filter from request
+    let filter = req.body.filter || {};
+    let update = req.body.update || {};
+
+    const upadteResult = await StudyService.updateStudy(filter, update);
+    // send response back to the client
+    return res.json({
+      status: "OK",
+      result: upadteResult,
+      message: "Study has been udpated successfully.",
+    });
+  } catch (e) {
+    return res.json({
+      status: "INTERNAL_ERROR",
+      message: e.message,
+    });
+  }
+}
+
 module.exports = {
   createStudy,
   deleteStudies,
   getStudies,
+  updateStudy,
 };

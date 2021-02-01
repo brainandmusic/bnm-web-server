@@ -13,8 +13,14 @@ function readStudies(filter, projection) {
   return Study.find(filter, projection);
 }
 
+// udpate a single study
+function updateStudy(filter, update) {
+  return Study.updateOne(filter, update);
+}
+
 module.exports = {
   createStudy,
   deleteStudies,
   readStudies,
+  updateStudy,
 };

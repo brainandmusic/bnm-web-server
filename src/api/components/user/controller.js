@@ -155,8 +155,13 @@ async function getEmailFromPasswordResetToken(req, res) {
 async function readUsers(req, res) {
   try {
     // read filter, projection from request paramters
-    const filter = JSON.parse(req.body.filter || {});
-    const projection = JSON.parse(req.body.projection || {});
+    const filter = req.body.filter || {};
+    const projection = req.body.projection || {};
+    const projectionKeys = Object.keys(projection);
+    for (let i = 0; i < projectionKeys.length; i += 1) {
+      const key = projectionKeys[i];
+      projection[key] = parseInt(projection[key]);
+    }
     const readResult = await UserService.readUsers(filter, projection);
     // send response back to the client
     return res.json({

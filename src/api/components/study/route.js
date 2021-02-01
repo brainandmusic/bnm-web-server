@@ -29,4 +29,12 @@ router
     StudyController.deleteStudies
   );
 
+router
+  .route("/update")
+  .post(
+    AuthService.checkLogin,
+    AccessService.isAdmin,
+    StudyController.updateStudy
+  );
+
 module.exports = router;
