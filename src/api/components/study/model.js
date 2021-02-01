@@ -35,6 +35,7 @@ const studySchema = new Schema({
   experiments: [
     {
       id: mongoose.Types.ObjectId,
+      name: String,
       stage: String,
     },
   ],

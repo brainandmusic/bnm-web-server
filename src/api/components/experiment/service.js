@@ -23,6 +23,10 @@ function readExperimentCards(
   return Experiment.find(filter, projection, options);
 }
 
+function readExperiments(filter = {}, projection = {}, options = {}) {
+  return Experiment.find(filter, projection, options);
+}
+
 function updateExperimentById(id, updateDoc) {
   return Experiment.findOneAndUpdate(
     { _id: id },
@@ -39,5 +43,6 @@ module.exports = {
   deleteExperimentById,
   readExperimentById,
   readExperimentCards,
+  readExperiments,
   updateExperimentById,
 };

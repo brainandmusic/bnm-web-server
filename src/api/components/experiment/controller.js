@@ -101,7 +101,17 @@ async function readExperiment(req, res) {
 
 async function readExperimentCards(req, res) {
   try {
-    const experimentsFromDb = await ExperimentService.readExperimentCards();
+    let filter = req.body.filter || {};
+    let projection = req.body.projection || {};
+    const projectionKeys = Object.keys(projection);
+    for (let i = 0; i < projectionKeys.length; i += 1) {
+      const key = projectionKeys[i];
+      projection[key] = parseInt(projection[key]);
+    }
+    const experimentsFromDb = await ExperimentService.readExperimentCards(
+      filter,
+      projection
+    );
     return res.json({
       status: "OK",
       result: experimentsFromDb,
