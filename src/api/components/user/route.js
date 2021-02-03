@@ -33,6 +33,14 @@ router
     AccessService.isAdmin,
     UserController.readUsers
   );
+// update multiple users' information
+router
+  .route("/update")
+  .post(
+    AuthService.checkLogin,
+    AccessService.isAdmin,
+    UserController.updateUsers
+  );
 // profile related
 router.route("/profile").post(AuthService.checkLogin, UserController.readUser);
 router.route("/profile").put(AuthService.checkLogin, UserController.updateUser);

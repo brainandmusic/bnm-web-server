@@ -32,6 +32,10 @@ function readUserById(id) {
   return User.findOne(conditions, projection);
 }
 
+function updateUsers(filter, update, options) {
+  return User.updateMany(filter, update, options);
+}
+
 function updateUserById(id, doc) {
   const filter = { _id: id };
   return User.updateOne(filter, doc);
@@ -44,5 +48,6 @@ module.exports = {
   readUserByEmail,
   readUserById,
   readUserByPasswordResetToken,
+  updateUsers,
   updateUserById,
 };

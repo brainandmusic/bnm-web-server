@@ -68,6 +68,11 @@ const userSchema = new Schema({
         type: mongoose.Types.ObjectId,
         required: true,
       },
+      status: {
+        type: String,
+        enum: ["pending", "complete"],
+        required: true,
+      },
       completeDate: {
         type: Date,
       },

@@ -508,6 +508,27 @@ async function updateUser(req, res) {
   }
 }
 
+async function updateUsers(req, res) {
+  try {
+    // read filter, update and options from request paramters
+    const filter = req.body.filter;
+    const update = req.body.update;
+    const options = req.body.options;
+    const updateResult = await UserService.updateUsers(filter, update, options);
+    // send response back to the client
+    return res.json({
+      status: "OK",
+      result: updateResult,
+      message: "User information has been updated successfully.",
+    });
+  } catch (e) {
+    return res.json({
+      status: "INTERNAL_ERROR",
+      message: e.message,
+    });
+  }
+}
+
 async function verifyEmail(req, res) {
   try {
     // read user email and verification token from request paramters
@@ -587,5 +608,6 @@ module.exports = {
   sendVerifyEmail,
   setAdmin,
   updateUser,
+  updateUsers,
   verifyEmail,
 };
