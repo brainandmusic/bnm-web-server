@@ -49,6 +49,29 @@ const userSchema = new Schema({
     required: true,
     default: ["participant"],
   },
+  experiments: [
+    {
+      studyId: {
+        type: mongoose.Types.ObjectId,
+        required: true,
+      },
+      experimentId: {
+        type: mongoose.Types.ObjectId,
+        required: true,
+      },
+      assignDate: {
+        type: Date,
+        default: Date.now(),
+        required: true,
+      },
+      assignerId: {
+        type: mongoose.Types.ObjectId,
+      },
+      completeDate: {
+        type: Date,
+      },
+    },
+  ],
 });
 
 userSchema.methods.hashPassword = function (password) {
