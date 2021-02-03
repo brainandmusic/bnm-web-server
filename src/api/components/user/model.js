@@ -66,6 +66,7 @@ const userSchema = new Schema({
       },
       assignerId: {
         type: mongoose.Types.ObjectId,
+        required: true,
       },
       completeDate: {
         type: Date,
