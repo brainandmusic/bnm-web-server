@@ -44,10 +44,11 @@ const userSchema = new Schema({
   dob: {
     type: String,
   },
-  roles: {
-    type: Array,
+  role: {
+    type: String,
     required: true,
-    default: ["participant"],
+    enum: ["participant", "ra", "admin"],
+    default: "participant",
   },
   experiments: [
     {

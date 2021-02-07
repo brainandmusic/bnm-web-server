@@ -1,4 +1,4 @@
-const UserService = require("../api/components/users/service");
+const UserService = require("../api/users/service");
 
 /*
  * isAdmin
