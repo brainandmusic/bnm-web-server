@@ -8,6 +8,14 @@ class UserService {
     return newUser.save({ w: "majority" });
   }
 
+  static getUser(filter = {}, projection = {}, options = {}) {
+    return User.findOne(filter, projection, options);
+  }
+
+  static updateUser(filter = {}, update = {}, options = {}) {
+    return User.findOneAndUpdate(filter, update, options);
+  }
+
   static getUsers(filter = {}, projection = {}, options = {}) {
     return User.find(filter, projection, options);
   }
@@ -22,57 +30,15 @@ class UserService {
     const filter = { _id: { $in: userIds } };
     return User.deleteMany(filter);
   }
+
+  static setPassword(userId, newPwd) {
+    const filter = { _id: userId };
+    const update = {
+      password: User.hashPassword(newPwd),
+      passwordResetToken: "",
+    };
+    return User.findOneAndUpdate(filter, update);
+  }
 }
 
 module.exports = UserService;
-
-// function createUser(user) {
-//   const newUser = new User(user);
-//   newUser.password = newUser.hashPassword(newUser.password);
-//   return newUser.save({ w: "majority" });
-// }
-
-// function deleteUserById(id) {
-//   const conditions = { _id: id };
-//   return User.deleteOne(conditions);
-// }
-
-// function readUsers(filter, projection) {
-//   return User.find(filter, projection);
-// }
-
-// function readUserByEmail(email) {
-//   return User.findOne({ email });
-// }
-
-// function readUserByPasswordResetToken(token) {
-//   const conditions = { passwordResetToken: token };
-//   const projection = { email: 1 };
-//   return User.findOne(conditions, projection);
-// }
-
-// function readUserById(id) {
-//   const conditions = { _id: id };
-//   const projection = { password: 0 };
-//   return User.findOne(conditions, projection);
-// }
-
-// function updateUsers(filter, update, options) {
-//   return User.updateMany(filter, update, options);
-// }
-
-// function updateUserById(id, doc) {
-//   const filter = { _id: id };
-//   return User.updateOne(filter, doc);
-// }
-
-// module.exports = {
-//   createUser,
-//   deleteUserById,
-//   readUsers,
-//   readUserByEmail,
-//   readUserById,
-//   readUserByPasswordResetToken,
-//   updateUsers,
-//   updateUserById,
-// };

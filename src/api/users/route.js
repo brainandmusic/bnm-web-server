@@ -12,6 +12,18 @@ router.route("/logout").post(AuthService.checkLogin, UserController.logout);
 
 router.route("/:userId").get(AuthService.checkLogin, UserController.getUser);
 
+// send password reset email to user
+router.route("/:userId/password/reset").post(UserController.forgetPassword);
+router
+  .route("/:userId/password/reset/token/:token")
+  .post(UserController.resetPassword);
+
+// send verification email to a newly registered user
+router.route("/:userId/account/verify").post(UserController.sendVerifyEmail);
+router
+  .route("/:userId/account/verify/token/:token")
+  .post(UserController.verifyEmail);
+
 router
   .route("/:userId/role")
   .put(AuthService.checkLogin, UserController.setRole);

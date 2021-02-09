@@ -235,6 +235,214 @@ class UserController {
       });
     }
   }
+
+  static async forgetPassword(req, res) {
+    try {
+      const email = req.body.email;
+      if (!email) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Email is missing",
+        });
+      }
+      const userFromDb = await UserService.getUser({ email }, { password: 0 });
+      if (!userFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "This account does not exist.",
+        });
+      }
+      // gen new token
+      const passwordResetToken = uuidv4().replace(/-/g, "");
+      // update user token back to database
+      await UserService.updateUser({ email }, { $set: passwordResetToken });
+      // send password reset email
+      await EmailService.sendPasswordResetEmail(
+        userFromDb.email,
+        userFromDb.firstName,
+        passwordResetToken
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        message: "Password reset email has been sent successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async resetPassword(req, res) {
+    try {
+      const userId = req.params.userId;
+      const token = req.params.token;
+      const password = req.body.password;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing.",
+        });
+      }
+      if (!token) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is missing.",
+        });
+      }
+      if (!password) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Password is missing.",
+        });
+      }
+      let userFromDb = await UserService.getUsers({ _id: userId });
+      if (!userFromDb || userFromDb.length !== 1) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "User ID does not exist.",
+        });
+      }
+      userFromDb = userFromDb[0];
+      // validate token
+      if (
+        !userFromDb.passwordResetToken ||
+        userFromDb.passwordResetToken !== token
+      ) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is invalid.",
+        });
+      }
+      // reset password
+      const resultFromDb = await UserService.setPassword(userId, password);
+      return res.json({
+        status: "OK",
+        result: resultFromDb,
+        message: "Password has been reset successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async sendVerifyEmail(req, res) {
+    try {
+      const userId = req.params.userId;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing.",
+        });
+      }
+
+      let userFromDb = await UserService.getUser(
+        { _id: userId },
+        { password: 0 }
+      );
+
+      if (!userFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "This user does not exist.",
+        });
+      }
+
+      if (userFromDb.emailVerified) {
+        return res.json({
+          status: "REQUEST_DENIED",
+          message: "This user has already verified account",
+        });
+      }
+
+      // send verification email
+      await EmailService.sendVerificationEmail(
+        userFromDb.email,
+        userFromDb.firstName,
+        userFromDb.emailVerifyToken
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        message: "Verification email has been sent successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async verifyEmail(req, res) {
+    try {
+      const userId = req.params.userId;
+      const token = req.params.token;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing.",
+        });
+      }
+      if (!token) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is missing.",
+        });
+      }
+
+      let userFromDb = await UserService.getUser({ _id: userId });
+      if (!userFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "User ID does not exist.",
+        });
+      }
+
+      if (userFromDb.emailVerified) {
+        return res.json({
+          status: "REQUEST_DENIED",
+          message: "This user has already verified account email.",
+        });
+      }
+
+      // validate token
+      if (
+        !userFromDb.emailVerifyToken ||
+        userFromDb.emailVerifyToken !== token
+      ) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is invalid.",
+        });
+      }
+      // reset password
+      const filter = { _id: userId };
+      const update = { $set: { emailVerifyToken: "", emailVerified: true } };
+      await UserService.updateUser(filter, update);
+      // generate jwt token
+      const jwtToken = JwtService.sign(
+        { _id: userFromDb._id },
+        process.env.USER_AUTH_JWT_SEC_KEY // eslint-disable-line no-undef
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        result: { token: jwtToken },
+        message: "Your email has been verified successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
 }
 
 module.exports = UserController;

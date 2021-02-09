@@ -50,38 +50,9 @@ const userSchema = new Schema({
     enum: ["participant", "ra", "admin"],
     default: "participant",
   },
-  experiments: [
-    {
-      studyId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      experimentId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      assignDate: {
-        type: Date,
-        default: Date.now(),
-        required: true,
-      },
-      assignerId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      status: {
-        type: String,
-        enum: ["pending", "complete"],
-        required: true,
-      },
-      completeDate: {
-        type: Date,
-      },
-    },
-  ],
 });
 
-userSchema.methods.hashPassword = function (password) {
+userSchema.statics.hashPassword = function (password) {
   return bcrypt.hashSync(password, 10);
 };
 
