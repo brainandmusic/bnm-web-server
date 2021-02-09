@@ -389,6 +389,190 @@ class StudyController {
       });
     }
   }
+
+  static async addExperiment(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const armId = req.params.armId;
+      const eventId = req.params.eventId;
+      const expId = req.params.expId;
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      if (!armId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Arm ID is missing.",
+        });
+      }
+      if (!eventId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Event ID is missing.",
+        });
+      }
+      if (!expId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Experiment ID is missing.",
+        });
+      }
+      const resultFromDb = await StudyService.addExperiments(
+        studyId,
+        armId,
+        eventId,
+        [expId]
+      );
+      return res.json({
+        status: "OK",
+        result: resultFromDb,
+        message: "Experiment has been added successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async addExperiments(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const armId = req.params.armId;
+      const eventId = req.params.eventId;
+      const expIds = req.body.expIds;
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      if (!armId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Arm ID is missing.",
+        });
+      }
+      if (!eventId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Event ID is missing.",
+        });
+      }
+      if (!expIds) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Experiment IDs are missing.",
+        });
+      }
+      const resultFromDb = await StudyService.addExperiments(
+        studyId,
+        armId,
+        eventId,
+        expIds
+      );
+      return res.json({
+        status: "OK",
+        result: resultFromDb,
+        message: "Experiments have been added to the event successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async getExperiments(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const armId = req.params.armId;
+      const eventId = req.params.eventId;
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      if (!armId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Arm ID is missing.",
+        });
+      }
+      if (!eventId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Event ID is missing.",
+        });
+      }
+      const eventsFromDb = await StudyService.getEvent(studyId, armId, eventId);
+      return res.json({
+        status: "OK",
+        result: eventsFromDb[0].experiments,
+        message: "Experiments have been retrieved successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async removeExperiments(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const armId = req.params.armId;
+      const eventId = req.params.eventId;
+      const expIds = req.body.expIds;
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      if (!armId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Arm ID is missing.",
+        });
+      }
+      if (!eventId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Event ID is missing.",
+        });
+      }
+      if (!expIds) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Experiment IDs are missing.",
+        });
+      }
+      const resultFromDb = await StudyService.removeExperiments(
+        studyId,
+        armId,
+        eventId,
+        expIds
+      );
+      return res.json({
+        status: "OK",
+        result: resultFromDb,
+        message: "Experiments have been removed from the event successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
 }
 
 module.exports = StudyController;

@@ -8,6 +8,7 @@ const userRoute = require("./src/api/users/route");
 const experimentRoute = require("./src/api/experiments/route");
 const studyRoute = require("./src/api/studies/route");
 const groupsRoute = require("./src/api/groups/route");
+const assessmentRoute = require("./src/api/assessments/route");
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use("/api/v1/users", userRoute);
 app.use("/api/v1/groups", groupsRoute);
 app.use("/api/v1/experiments", experimentRoute);
 app.use("/api/v1/studies", studyRoute);
+app.use("/api/v1/assessments", assessmentRoute);
 
 app.get("/", (req, res) => {
   res.send("Brain and Music Lab backend is running");

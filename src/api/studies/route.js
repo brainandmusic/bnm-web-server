@@ -26,4 +26,17 @@ router
   .route("/:studyId/arms/:armId/events/:eventId")
   .delete(StudyController.deleteEvent);
 
+router
+  .route("/:studyId/arms/:armId/events/:eventId/experiments")
+  .get(StudyController.getExperiments);
+router
+  .route("/:studyId/arms/:armId/events/:eventId/experiments")
+  .post(StudyController.addExperiments);
+router
+  .route("/:studyId/arms/:armId/events/:eventId/experiments")
+  .delete(StudyController.removeExperiments);
+router
+  .route("/:studyId/arms/:armId/events/:eventId/experiments/:expId")
+  .post(StudyController.addExperiment);
+
 module.exports = router;

@@ -89,26 +89,38 @@ class StudyService {
     const update = { $pull: { "arms.$.events": { _id: eventId } } };
     return Study.findOneAndUpdate(filter, update);
   }
+
+  static addExperiments(studyId, armId, eventId, expIds) {
+    const filter = {
+      _id: studyId,
+      arms: { $elemMatch: { _id: armId, "events._id": eventId } },
+    };
+    const update = {
+      $addToSet: {
+        "arms.$[outer].events.$[inner].experiments": { $each: expIds },
+      },
+    };
+    const options = {
+      arrayFilters: [{ "outer._id": armId }, { "inner._id": eventId }],
+    };
+    return Study.findOneAndUpdate(filter, update, options);
+  }
+
+  static removeExperiments(studyId, armId, eventId, expIds) {
+    const filter = {
+      _id: studyId,
+      arms: { $elemMatch: { _id: armId, "events._id": eventId } },
+    };
+    const update = {
+      $pull: {
+        "arms.$[outer].events.$[inner].experiments": { $in: expIds },
+      },
+    };
+    const options = {
+      arrayFilters: [{ "outer._id": armId }, { "inner._id": eventId }],
+    };
+    return Study.findOneAndUpdate(filter, update, options);
+  }
 }
 
 module.exports = StudyService;
-
-// function deleteStudies(filter) {
-//   return Study.deleteMany(filter);
-// }
-
-// function readStudies(filter, projection) {
-//   return Study.find(filter, projection);
-// }
-
-// // udpate a single study
-// function updateStudy(filter, update) {
-//   return Study.updateOne(filter, update);
-// }
-
-// module.exports = {
-//   createStudy,
-//   deleteStudies,
-//   readStudies,
-//   updateStudy,
-// };
