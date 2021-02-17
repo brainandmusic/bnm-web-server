@@ -32,6 +32,7 @@ class UserController {
       userFromDb = await UserService.createUser(userInfo);
       // send verification email
       await EmailService.sendVerificationEmail(
+        userFromDb._id,
         userFromDb.email,
         userFromDb.firstName,
         userFromDb.emailVerifyToken
@@ -82,6 +83,7 @@ class UserController {
         // user account is not verified, login is not permitted
         // send verification email
         await EmailService.sendVerificationEmail(
+          userFromDb._id,
           userFromDb.email,
           userFromDb.firstName,
           userFromDb.emailVerifyToken
