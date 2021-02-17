@@ -5,7 +5,13 @@ class ExperimentController {
   static async createExperiment(req, res) {
     try {
       const expInfo = req.body.expInfo;
-      if (!expInfo || !expInfo.name || !expInfo.creator || !expInfo.data) {
+      if (
+        !expInfo ||
+        !expInfo.name ||
+        !expInfo.creator ||
+        !expInfo.data ||
+        !expInfo.platform
+      ) {
         return res.json({
           status: "INVALID_REQUEST",
           message: "Experiment info is incomplete.",

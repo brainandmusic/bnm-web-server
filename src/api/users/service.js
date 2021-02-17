@@ -37,6 +37,7 @@ class UserService {
       password: User.hashPassword(newPwd),
       passwordResetToken: "",
     };
+    console.log(update);
     return User.findOneAndUpdate(filter, update);
   }
 }

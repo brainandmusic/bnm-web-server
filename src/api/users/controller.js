@@ -39,6 +39,7 @@ class UserController {
       // send response back to the client
       return res.json({
         status: "OK",
+        result: userFromDb,
         message:
           "You account has been created successfully. Please check your email for verifying your account.",
       });
@@ -76,8 +77,22 @@ class UserController {
           message: "This email has not registered yet.",
         });
       }
-      // check if password matches
       userFromDb = userFromDb[0];
+      if (!userFromDb.emailVerified) {
+        // user account is not verified, login is not permitted
+        // send verification email
+        await EmailService.sendVerificationEmail(
+          userFromDb.email,
+          userFromDb.firstName,
+          userFromDb.emailVerifyToken
+        );
+        return res.json({
+          status: "EMAIL_VERIFY_REQUIRED",
+          message:
+            "We just sent you an email. Please check your inbox and follow the instructions to verify your account before login.",
+        });
+      }
+      // check if password matches
       if (!userFromDb.validPassword(password)) {
         return res.json({
           status: "REQUEST_DENIED",
@@ -93,9 +108,8 @@ class UserController {
       return res.json({
         status: "OK",
         result: {
-          token,
-          role: userFromDb.role,
-          id: userFromDb._id,
+          auth_token: token,
+          uid: userFromDb._id,
         },
       });
     } catch (e) {
@@ -254,10 +268,13 @@ class UserController {
       }
       // gen new token
       const passwordResetToken = uuidv4().replace(/-/g, "");
+
       // update user token back to database
-      await UserService.updateUser({ email }, { $set: passwordResetToken });
+      await UserService.updateUser({ email }, { $set: { passwordResetToken } });
+
       // send password reset email
       await EmailService.sendPasswordResetEmail(
+        userFromDb._id,
         userFromDb.email,
         userFromDb.firstName,
         passwordResetToken
@@ -298,14 +315,13 @@ class UserController {
           message: "Password is missing.",
         });
       }
-      let userFromDb = await UserService.getUsers({ _id: userId });
-      if (!userFromDb || userFromDb.length !== 1) {
+      let userFromDb = await UserService.getUser({ _id: userId });
+      if (!userFromDb) {
         return res.json({
           status: "ZERO_RESULTS",
           message: "User ID does not exist.",
         });
       }
-      userFromDb = userFromDb[0];
       // validate token
       if (
         !userFromDb.passwordResetToken ||
@@ -362,6 +378,7 @@ class UserController {
 
       // send verification email
       await EmailService.sendVerificationEmail(
+        userFromDb._id,
         userFromDb.email,
         userFromDb.firstName,
         userFromDb.emailVerifyToken
@@ -433,7 +450,7 @@ class UserController {
       // send response back to the client
       return res.json({
         status: "OK",
-        result: { token: jwtToken },
+        result: { auth_token: jwtToken, uid: userFromDb._id },
         message: "Your email has been verified successfully.",
       });
     } catch (e) {
@@ -968,22 +985,3 @@ async function verifyEmail(req, res) {
     });
   }
 }
-
-// module.exports = {
-//   checkAdmin,
-//   createUser,
-//   deleteUser,
-//   getEmailFromPasswordResetToken,
-//   login,
-//   logout,
-//   readUser,
-//   readUsers,
-//   removeAdmin,
-//   resetPassword,
-//   sendForgetPasswordEmail,
-//   sendVerifyEmail,
-//   setAdmin,
-//   updateUser,
-//   updateUsers,
-//   verifyEmail,
-// };

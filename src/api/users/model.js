@@ -52,13 +52,17 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.statics.hashPassword = function (password) {
+userSchema.methods.hashPassword = function (password) {
   return bcrypt.hashSync(password, 10);
 };
 
 // return true iff password is valid
 userSchema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
+};
+
+userSchema.statics.hashPassword = function (password) {
+  return bcrypt.hashSync(password, 10);
 };
 
 const User = mongoose.model("User", userSchema, "users");
