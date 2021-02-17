@@ -1,7 +1,468 @@
 const { v4: uuidv4 } = require("uuid");
-const EmailService = require("../../../services/email");
-const JwtService = require("../../../services/jwt");
+const EmailService = require("../../services/email");
+const JwtService = require("../../services/jwt");
 const UserService = require("./service");
+
+class UserController {
+  static async register(req, res) {
+    try {
+      const userInfo = req.body.userInfo;
+      // validate user info
+      if (
+        !userInfo ||
+        !userInfo.firstName ||
+        !userInfo.lastName ||
+        !userInfo.email ||
+        !userInfo.password
+      ) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User info is incomplete.",
+        });
+      }
+      // check if user has already registered before
+      let userFromDb = await UserService.getUsers({ email: userInfo.email });
+      if (userFromDb.length != 0) {
+        return res.json({
+          status: "REQUEST_DENIED",
+          message: "This email has already registered.",
+        });
+      }
+      // insert new user into database
+      userFromDb = await UserService.createUser(userInfo);
+      // send verification email
+      await EmailService.sendVerificationEmail(
+        userFromDb.email,
+        userFromDb.firstName,
+        userFromDb.emailVerifyToken
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        result: userFromDb,
+        message:
+          "You account has been created successfully. Please check your email for verifying your account.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async login(req, res) {
+    try {
+      // read user credentials from request body
+      const email = req.body.email;
+      const password = req.body.password;
+      // validate user credentials
+      if (!email) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Email is missing.",
+        });
+      }
+      if (!password) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Password is missing.",
+        });
+      }
+      // find the user from database
+      let userFromDb = await UserService.getUsers({ email });
+      if (userFromDb.length !== 1) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "This email has not registered yet.",
+        });
+      }
+      userFromDb = userFromDb[0];
+      if (!userFromDb.emailVerified) {
+        // user account is not verified, login is not permitted
+        // send verification email
+        await EmailService.sendVerificationEmail(
+          userFromDb.email,
+          userFromDb.firstName,
+          userFromDb.emailVerifyToken
+        );
+        return res.json({
+          status: "EMAIL_VERIFY_REQUIRED",
+          message:
+            "We just sent you an email. Please check your inbox and follow the instructions to verify your account before login.",
+        });
+      }
+      // check if password matches
+      if (!userFromDb.validPassword(password)) {
+        return res.json({
+          status: "REQUEST_DENIED",
+          message: "Password is incorrect.",
+        });
+      }
+      // generate jwt token
+      const token = JwtService.sign(
+        { _id: userFromDb._id },
+        process.env.USER_AUTH_JWT_SEC_KEY // eslint-disable-line no-undef
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        result: {
+          auth_token: token,
+          uid: userFromDb._id,
+        },
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async logout(req, res) {
+    try {
+      return res.json({
+        status: "OK",
+        message: "You have logged out successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: "Internal Server Error",
+      });
+    }
+  }
+
+  static async getUser(req, res) {
+    try {
+      const userId = req.params.userId;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing",
+        });
+      }
+      const usersFromDb = await UserService.getUsers(
+        { _id: userId },
+        { password: 0 }
+      );
+      if (usersFromDb.length === 0) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "No user is found.",
+        });
+      }
+      return res.json({
+        status: "OK",
+        result: usersFromDb[0],
+        message: "User is retrieved successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async getUsers(req, res) {
+    try {
+      const userIds = req.body.userIds;
+      let usersFromDb;
+      if (userIds) {
+        usersFromDb = await UserService.getUsers(
+          { _id: { $in: userIds } },
+          { password: 0, emailVerified: 0, emailVerifyToken: 0 }
+        );
+      } else {
+        usersFromDb = await UserService.getUsers(
+          {},
+          { password: 0, emailVerified: 0, emailVerifyToken: 0 }
+        );
+      }
+      if (usersFromDb.length === 0) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "No user is found.",
+        });
+      }
+      return res.json({
+        status: "OK",
+        result: usersFromDb,
+        message: "Users are retrieved successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async getRole(req, res) {
+    try {
+      const userId = req.params.userId;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing",
+        });
+      }
+      const usersFromDb = await UserService.getUsers(
+        { _id: userId },
+        { _id: 0, role: 1 }
+      );
+      if (usersFromDb.length === 0) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "No user is found.",
+        });
+      }
+      return res.json({
+        status: "OK",
+        result: usersFromDb[0],
+        message: "Role is retrieved successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async setRole(req, res) {
+    try {
+      const userId = req.params.userId;
+      const role = req.body.role;
+      const resultFromDb = await UserService.updateUsers([userId], { role });
+      return res.json({
+        status: "OK",
+        result: resultFromDb,
+        message: "Role has been set successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async forgetPassword(req, res) {
+    try {
+      const email = req.body.email;
+      if (!email) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Email is missing",
+        });
+      }
+      const userFromDb = await UserService.getUser({ email }, { password: 0 });
+      if (!userFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "This account does not exist.",
+        });
+      }
+      // gen new token
+      const passwordResetToken = uuidv4().replace(/-/g, "");
+
+      // update user token back to database
+      await UserService.updateUser({ email }, { $set: { passwordResetToken } });
+
+      // send password reset email
+      await EmailService.sendPasswordResetEmail(
+        userFromDb._id,
+        userFromDb.email,
+        userFromDb.firstName,
+        passwordResetToken
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        message: "Password reset email has been sent successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async resetPassword(req, res) {
+    try {
+      const userId = req.params.userId;
+      const token = req.params.token;
+      const password = req.body.password;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing.",
+        });
+      }
+      if (!token) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is missing.",
+        });
+      }
+      if (!password) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Password is missing.",
+        });
+      }
+      let userFromDb = await UserService.getUser({ _id: userId });
+      if (!userFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "User ID does not exist.",
+        });
+      }
+      // validate token
+      if (
+        !userFromDb.passwordResetToken ||
+        userFromDb.passwordResetToken !== token
+      ) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is invalid.",
+        });
+      }
+      // reset password
+      const resultFromDb = await UserService.setPassword(userId, password);
+      return res.json({
+        status: "OK",
+        result: resultFromDb,
+        message: "Password has been reset successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async sendVerifyEmail(req, res) {
+    try {
+      const userId = req.params.userId;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing.",
+        });
+      }
+
+      let userFromDb = await UserService.getUser(
+        { _id: userId },
+        { password: 0 }
+      );
+
+      if (!userFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "This user does not exist.",
+        });
+      }
+
+      if (userFromDb.emailVerified) {
+        return res.json({
+          status: "REQUEST_DENIED",
+          message: "This user has already verified account",
+        });
+      }
+
+      // send verification email
+      await EmailService.sendVerificationEmail(
+        userFromDb._id,
+        userFromDb.email,
+        userFromDb.firstName,
+        userFromDb.emailVerifyToken
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        message: "Verification email has been sent successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async verifyEmail(req, res) {
+    try {
+      const userId = req.params.userId;
+      const token = req.params.token;
+      if (!userId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "User ID is missing.",
+        });
+      }
+      if (!token) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is missing.",
+        });
+      }
+
+      let userFromDb = await UserService.getUser({ _id: userId });
+      if (!userFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "User ID does not exist.",
+        });
+      }
+
+      if (userFromDb.emailVerified) {
+        return res.json({
+          status: "REQUEST_DENIED",
+          message: "This user has already verified account email.",
+        });
+      }
+
+      // validate token
+      if (
+        !userFromDb.emailVerifyToken ||
+        userFromDb.emailVerifyToken !== token
+      ) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Token is invalid.",
+        });
+      }
+      // reset password
+      const filter = { _id: userId };
+      const update = { $set: { emailVerifyToken: "", emailVerified: true } };
+      await UserService.updateUser(filter, update);
+      // generate jwt token
+      const jwtToken = JwtService.sign(
+        { _id: userFromDb._id },
+        process.env.USER_AUTH_JWT_SEC_KEY // eslint-disable-line no-undef
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        result: { auth_token: jwtToken, uid: userFromDb._id },
+        message: "Your email has been verified successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+}
+
+module.exports = UserController;
 
 async function checkAdmin(req, res) {
   try {
@@ -172,74 +633,6 @@ async function readUsers(req, res) {
     return res.json({
       status: "INTERNAL_ERROR",
       message: e.message,
-    });
-  }
-}
-
-async function login(req, res) {
-  try {
-    // read user credentials from request body
-    const email = req.body.email;
-    const password = req.body.password;
-    // validate user credentials
-    if (!email) {
-      return res.json({
-        status: "INVALID_REQUEST",
-        message: "Email is missing.",
-      });
-    }
-    if (!password) {
-      return res.json({
-        status: "INVALID_REQUEST",
-        message: "Password is missing.",
-      });
-    }
-    // find user from database
-    const userFromDb = await UserService.readUserByEmail(email);
-    if (!userFromDb) {
-      return res.json({
-        status: "ZERO_RESULTS",
-        message: "No account is associated with this email.",
-      });
-    }
-    // check if password matches
-    if (!userFromDb.validPassword(password)) {
-      return res.json({
-        status: "REQUEST_DENIED",
-        message: "Password is incorrect.",
-      });
-    }
-    // generate jwt token
-    const token = JwtService.sign(
-      { _id: userFromDb._id },
-      process.env.USER_AUTH_JWT_SEC_KEY // eslint-disable-line no-undef
-    );
-    // send response back to the client
-    return res.json({
-      status: "OK",
-      result: {
-        token,
-        roles: userFromDb.roles,
-      },
-    });
-  } catch (e) {
-    return res.json({
-      status: "UNKNOWN_ERROR",
-      message: "Internal Server Error",
-    });
-  }
-}
-
-async function logout(req, res) {
-  try {
-    return res.json({
-      status: "OK",
-      message: "You have logged out successfully.",
-    });
-  } catch (e) {
-    return res.json({
-      status: "UNKNOWN_ERROR",
-      message: "Internal Server Error",
     });
   }
 }
@@ -592,22 +985,3 @@ async function verifyEmail(req, res) {
     });
   }
 }
-
-module.exports = {
-  checkAdmin,
-  createUser,
-  deleteUser,
-  getEmailFromPasswordResetToken,
-  login,
-  logout,
-  readUser,
-  readUsers,
-  removeAdmin,
-  resetPassword,
-  sendForgetPasswordEmail,
-  sendVerifyEmail,
-  setAdmin,
-  updateUser,
-  updateUsers,
-  verifyEmail,
-};

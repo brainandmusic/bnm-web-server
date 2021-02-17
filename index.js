@@ -4,14 +4,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 
-const userRoute = require("./src/api/components/user/route");
-const experimentRoute = require("./src/api/components/experiment/route");
-const studyRoute = require("./src/api/components/study/route");
+const userRoute = require("./src/api/users/route");
+const experimentRoute = require("./src/api/experiments/route");
+const studyRoute = require("./src/api/studies/route");
+const groupsRoute = require("./src/api/groups/route");
+const assessmentRoute = require("./src/api/assessments/route");
 
 dotenv.config();
 
 mongoose.set("useUnifiedTopology", true);
 mongoose.set("useFindAndModify", false);
+mongoose.set("returnOriginal", false);
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true }); // eslint-disable-line no-undef
 
 const app = express();
@@ -24,12 +27,19 @@ app.use(morgan("tiny"));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-app.use("/api/v1/user", userRoute);
-app.use("/api/v1/experiment", experimentRoute);
-app.use("/api/v1/study", studyRoute);
+app.use("/api/v1/users", userRoute);
+app.use("/api/v1/groups", groupsRoute);
+app.use("/api/v1/experiments", experimentRoute);
+app.use("/api/v1/studies", studyRoute);
+app.use("/api/v1/assessments", assessmentRoute);
 
 app.get("/", (req, res) => {
   res.send("Brain and Music Lab backend is running");
+});
+
+app.post("/", (req, res) => {
+  // echo the request body
+  res.json(req.body);
 });
 
 app.listen(port, () => {

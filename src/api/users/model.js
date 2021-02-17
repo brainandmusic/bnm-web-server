@@ -44,40 +44,12 @@ const userSchema = new Schema({
   dob: {
     type: String,
   },
-  roles: {
-    type: Array,
+  role: {
+    type: String,
     required: true,
-    default: ["participant"],
+    enum: ["participant", "ra", "admin"],
+    default: "participant",
   },
-  experiments: [
-    {
-      studyId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      experimentId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      assignDate: {
-        type: Date,
-        default: Date.now(),
-        required: true,
-      },
-      assignerId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      status: {
-        type: String,
-        enum: ["pending", "complete"],
-        required: true,
-      },
-      completeDate: {
-        type: Date,
-      },
-    },
-  ],
 });
 
 userSchema.methods.hashPassword = function (password) {
@@ -87,6 +59,10 @@ userSchema.methods.hashPassword = function (password) {
 // return true iff password is valid
 userSchema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
+};
+
+userSchema.statics.hashPassword = function (password) {
+  return bcrypt.hashSync(password, 10);
 };
 
 const User = mongoose.model("User", userSchema, "users");

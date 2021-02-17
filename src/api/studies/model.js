@@ -24,19 +24,22 @@ const studySchema = new Schema({
     type: mongoose.ObjectId,
     required: true,
   },
-  members: [
+  members: [mongoose.Types.ObjectId],
+  arms: [
     {
-      id: mongoose.Types.ObjectId,
-      firstName: String,
-      lastName: String,
-      email: String,
-    },
-  ],
-  experiments: [
-    {
-      id: mongoose.Types.ObjectId,
-      name: String,
-      stage: String,
+      name: {
+        type: String,
+        required: true,
+      },
+      events: [
+        {
+          name: {
+            type: String,
+            required: true,
+          },
+          experiments: [mongoose.Types.ObjectId],
+        },
+      ],
     },
   ],
 });
