@@ -6,12 +6,7 @@ class StudyController {
       // read study info from request
       const studyInfo = req.body.studyInfo;
       // validate study info
-      if (
-        !studyInfo ||
-        !studyInfo.name ||
-        !studyInfo.creator ||
-        !studyInfo.status
-      ) {
+      if (!studyInfo || !studyInfo.name || !studyInfo.creator) {
         return res.json({
           status: "INVALID_REQUEST",
           message: "Study info is incomplete.",
