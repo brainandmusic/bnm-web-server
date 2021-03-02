@@ -121,6 +121,18 @@ class StudyService {
     };
     return Study.findOneAndUpdate(filter, update, options);
   }
+
+  static deleteMembers(studyId, memberIds) {
+    const filter = { _id: studyId };
+    const update = { $pull: { members: { $in: memberIds } } };
+    return Study.findOneAndUpdate(filter, update);
+  }
+
+  static addMembers(studyId, memberIds) {
+    const filter = { _id: studyId };
+    const update = { $addToSet: { members: { $each: memberIds } } };
+    return Study.findOneAndUpdate(filter, update);
+  }
 }
 
 module.exports = StudyService;

@@ -599,6 +599,72 @@ class StudyController {
       });
     }
   }
+
+  static async deleteMember(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const memberId = req.params.memberId;
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      if (!memberId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Member ID is missing.",
+        });
+      }
+      const resFromDB = await StudyService.deleteMembers(studyId, [memberId]);
+
+      // const studyFromDb = await StudyService.getStudy(filter, projection);
+      // if (studyFromDb === null) {
+      //   return res.json({
+      //     status: "ZERO_RESULTS",
+      //     message: "Study does not exist.",
+      //   });
+      // }
+      return res.json({
+        status: "OK",
+        result: resFromDB,
+        message: "Member has been removed successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async addMembers(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      // read new member IDs from request
+      const memberIds = req.body.memberIds;
+      // validate member IDs
+      if (!memberIds) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "memberIds is not in request",
+        });
+      }
+
+      const studyFromDb = await StudyService.addMembers(studyId, memberIds);
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        result: studyFromDb,
+        message: "Members have been added to study successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
 }
 
 module.exports = StudyController;

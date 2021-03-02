@@ -40,5 +40,9 @@ router
   .post(StudyController.addExperiment);
 
 router.route("/:studyId/members").get(StudyController.getMembers);
+router.route("/:studyId/members").post(StudyController.addMembers);
+router
+  .route("/:studyId/members/:memberId")
+  .delete(StudyController.deleteMember);
 
 module.exports = router;
