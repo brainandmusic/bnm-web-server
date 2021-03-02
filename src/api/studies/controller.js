@@ -580,8 +580,8 @@ class StudyController {
           message: "Study ID is missing.",
         });
       }
-      const studiesFromDb = await StudyService.getStudies(filter, projection);
-      if (studiesFromDb.length !== 1) {
+      const studyFromDb = await StudyService.getStudy(filter, projection);
+      if (studyFromDb === null) {
         return res.json({
           status: "ZERO_RESULTS",
           message: "Study does not exist.",
@@ -589,7 +589,7 @@ class StudyController {
       }
       return res.json({
         status: "OK",
-        result: studiesFromDb[0],
+        result: studyFromDb.members,
         message: "Members have been retrieved successfully",
       });
     } catch (e) {
