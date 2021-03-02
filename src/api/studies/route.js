@@ -45,4 +45,10 @@ router
   .route("/:studyId/members/:memberId")
   .delete(StudyController.deleteMember);
 
+router.route("/:studyId/participants").get(StudyController.getParticipants);
+router.route("/:studyId/participants").post(StudyController.addParticipants);
+router
+  .route("/:studyId/participants/:participantId")
+  .delete(StudyController.deleteParticipant);
+
 module.exports = router;

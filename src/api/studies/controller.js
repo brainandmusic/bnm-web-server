@@ -665,6 +665,101 @@ class StudyController {
       });
     }
   }
+
+  static async getParticipants(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const filter = { _id: studyId };
+      const projection = { _id: 0, participants: 1 };
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      const studyFromDb = await StudyService.getStudy(filter, projection);
+      if (studyFromDb === null) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "Study does not exist.",
+        });
+      }
+      return res.json({
+        status: "OK",
+        result: studyFromDb.participants,
+        message: "Participants have been retrieved successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async deleteParticipant(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const participantId = req.params.participantId;
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      if (!participantId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Participant ID is missing.",
+        });
+      }
+
+      const resFromDB = await StudyService.deleteParticipants(studyId, [
+        participantId,
+      ]);
+      return res.json({
+        status: "OK",
+        result: resFromDB,
+        message: "Participant has been removed successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async addParticipants(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      // read new participant IDs from request
+      const participantIds = req.body.participantIds;
+      // validate member IDs
+      if (!participantIds) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "participantIds field is not in request",
+        });
+      }
+
+      const studyFromDb = await StudyService.addParticipants(
+        studyId,
+        participantIds
+      );
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        result: studyFromDb,
+        message: "Participants have been added to study successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
 }
 
 module.exports = StudyController;

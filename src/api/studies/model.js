@@ -26,6 +26,7 @@ const studySchema = new Schema({
     required: true,
   },
   members: [mongoose.Types.ObjectId],
+  participants: [mongoose.Types.ObjectId],
   arms: [
     {
       name: {
