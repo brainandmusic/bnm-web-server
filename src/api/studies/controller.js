@@ -568,6 +568,37 @@ class StudyController {
       });
     }
   }
+
+  static async getMembers(req, res) {
+    try {
+      const studyId = req.params.studyId;
+      const filter = { _id: studyId };
+      const projection = { _id: 0, members: 1 };
+      if (!studyId) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Study ID is missing.",
+        });
+      }
+      const studiesFromDb = await StudyService.getStudies(filter, projection);
+      if (studiesFromDb.length !== 1) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "Study does not exist.",
+        });
+      }
+      return res.json({
+        status: "OK",
+        result: studiesFromDb[0],
+        message: "Members have been retrieved successfully",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
 }
 
 module.exports = StudyController;

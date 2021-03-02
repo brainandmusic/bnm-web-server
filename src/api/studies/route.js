@@ -39,4 +39,6 @@ router
   .route("/:studyId/arms/:armId/events/:eventId/experiments/:expId")
   .post(StudyController.addExperiment);
 
+router.route("/:studyId/members").get(StudyController.getMembers);
+
 module.exports = router;
