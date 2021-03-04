@@ -61,17 +61,22 @@ class StudyController {
 
   static async getStudies(req, res) {
     try {
+      const uid = req.query.uid;
       const studyIds = req.body.studyIds;
       const projection = req.body.projection;
       let filter = {};
       if (studyIds) {
         filter = { _id: { $in: studyIds } };
       }
+      if (uid) {
+        // query all the studies this user is a creator or a team member of
+        filter = { $or: [{ creator: uid }, { members: uid }] };
+      }
       const studiesFromDb = await StudyService.getStudies(filter, projection);
       return res.json({
         status: "OK",
         result: studiesFromDb,
-        message: "Study has been retrieved successfully",
+        message: "Studies have been retrieved successfully",
       });
     } catch (e) {
       return res.json({
