@@ -18,6 +18,13 @@ const groupSchema = new Schema({
     required: true,
   },
   members: [mongoose.Types.ObjectId],
+  studyId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
 });
 
 const Group = mongoose.model("Group", groupSchema, "groups");

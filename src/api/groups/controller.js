@@ -126,16 +126,10 @@ class GroupController {
 
   static async getGroups(req, res) {
     try {
-      // read params from request body
-      const filter = req.body.filter || {};
-      const projection = req.body.projection || {};
-      const options = req.body.options || {};
+      const studyId = req.query.studyId;
+      const filter = studyId ? { studyId } : {};
       // query db
-      const groupsFromDb = await GroupService.getGroups(
-        filter,
-        projection,
-        options
-      );
+      const groupsFromDb = await GroupService.getGroups(filter, {}, {});
       // return results to client
       res.json({
         status: "OK",
