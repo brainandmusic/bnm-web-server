@@ -65,7 +65,9 @@ class ExperimentController {
   static async getExperiments(req, res) {
     try {
       const expIds = req.body.expIds;
-      const projection = req.body.projection;
+      const summary = req.query.summary;
+      let projection =
+        req.body.projection || (summary === "1" ? { data: 0 } : {});
       let filter = {};
       if (expIds) {
         filter = { _id: { $in: expIds } };
