@@ -35,7 +35,9 @@ class ExperimentController {
   static async getExperiment(req, res) {
     try {
       const expId = req.params.expId;
-      const projection = req.body.projection;
+      const summary = req.query.summary;
+      let projection =
+        req.body.projection || (summary === "1" ? { data: 0 } : {});
       const filter = { _id: expId };
       const expsFromDb = await ExperimentService.getExperiments(
         filter,

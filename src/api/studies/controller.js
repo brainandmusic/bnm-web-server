@@ -339,7 +339,7 @@ class StudyController {
       return res.json({
         status: "OK",
         result: eventsFromDb[0],
-        message: "Event has been created successfully.",
+        message: "Event has been retrieved successfully.",
       });
     } catch (e) {
       return res.json({
