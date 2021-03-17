@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const assessmentSchema = new Schema({
+  transactionId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+  },
   studyId: {
     type: mongoose.Types.ObjectId,
     required: true,

@@ -18,6 +18,10 @@ class AssessmentService {
     const filter = { _id: assId };
     return Assessment.findOneAndDelete(filter);
   }
+  static deleteAssessmentByTransId(transId) {
+    const filter = { transactionId: transId };
+    return Assessment.deleteMany(filter);
+  }
 }
 
 module.exports = AssessmentService;

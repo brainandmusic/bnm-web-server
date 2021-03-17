@@ -8,6 +8,7 @@ class AssessmentController {
       // validate study info
       if (
         !assessmentInfo ||
+        !assessmentInfo.transactionId ||
         !assessmentInfo.studyId ||
         !assessmentInfo.armId ||
         !assessmentInfo.eventId ||
