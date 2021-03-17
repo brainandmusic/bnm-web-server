@@ -5,6 +5,7 @@ const TransactionController = require("./controller");
 
 const router = new Router();
 
+router.route("/").get(TransactionController.getTransactions);
 router.route("/").post(TransactionController.createTransaction);
 router.route("/:transId").delete(TransactionController.deleteTransaction);
 

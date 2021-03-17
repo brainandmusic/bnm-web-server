@@ -57,6 +57,25 @@ class TransactionController {
       });
     }
   }
+
+  static async getTransactions(req, res) {
+    try {
+      const eventId = req.query.eventId;
+      const filter = eventId ? { eventId } : {};
+      const transFromDb = await TransactionService.getTransactions(filter);
+      // send response back to the client
+      return res.json({
+        status: "OK",
+        result: transFromDb,
+        message: "Transactions have been retrieved successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
 }
 
 module.exports = TransactionController;
