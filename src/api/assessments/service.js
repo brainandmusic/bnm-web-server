@@ -10,6 +10,10 @@ class AssessmentService {
     return Assessment.findOne(filter, projection, options);
   }
 
+  static getAssessments(filter = {}, projection = {}, options = {}) {
+    return Assessment.find(filter, projection, options);
+  }
+
   static updateAssessment(filter = {}, update = {}, options = {}) {
     return Assessment.findOneAndUpdate(filter, update, options);
   }

@@ -68,6 +68,34 @@ class AssessmentController {
     }
   }
 
+  static async getAssessments(req, res) {
+    try {
+      const uid = req.query.uid;
+      const status = req.query.status;
+      if (!uid) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "Participant ID is missing.",
+        });
+      }
+      let filter = { participantId: uid };
+      if (status) {
+        filter.status = status;
+      }
+      const assFromDb = await AssessmentService.getAssessments(filter);
+      return res.json({
+        status: "OK",
+        result: assFromDb,
+        message: "Assessments have been retrieved successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
   static async deleteAssessment(req, res) {
     try {
       const assId = req.params.assId;
@@ -159,6 +187,41 @@ class AssessmentController {
         status === "complete"
           ? { $set: { status, completeDate: Date.now() } }
           : { $set: { status } };
+      const assFromDb = await AssessmentService.updateAssessment(
+        filter,
+        update
+      );
+      if (!assFromDb) {
+        return res.json({
+          status: "ZERO_RESULTS",
+          message: "No assessment is found.",
+        });
+      }
+      return res.json({
+        status: "OK",
+        result: assFromDb,
+        message: "Assessment has been updated successfully.",
+      });
+    } catch (e) {
+      return res.json({
+        status: "INTERNAL_ERROR",
+        message: e.message,
+      });
+    }
+  }
+
+  static async updateAssessment(req, res) {
+    try {
+      const assId = req.params.assId;
+      const assessmentInfo = req.body.assessmentInfo;
+      if (!assessmentInfo) {
+        return res.json({
+          status: "INVALID_REQUEST",
+          message: "assessmentInfo is missing.",
+        });
+      }
+      const filter = { _id: assId };
+      const update = { $set: assessmentInfo };
       const assFromDb = await AssessmentService.updateAssessment(
         filter,
         update
