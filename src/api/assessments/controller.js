@@ -71,14 +71,18 @@ class AssessmentController {
   static async getAssessments(req, res) {
     try {
       const uid = req.query.uid;
+      const transid = req.query.transid;
       const status = req.query.status;
-      if (!uid) {
+      if (!uid && !transid) {
         return res.json({
           status: "INVALID_REQUEST",
-          message: "Participant ID is missing.",
+          message: "Invalid request",
         });
       }
-      let filter = { participantId: uid };
+      let filter = {
+        ...(uid && { participantId: uid }),
+        ...(transid && { transactionId: transid }),
+      };
       if (status) {
         filter.status = status;
       }
