@@ -275,17 +275,14 @@ class UserController {
       await UserService.updateUser({ email }, { $set: { passwordResetToken } });
 
       // send password reset email
-      await EmailService.sendPasswordResetEmail(
+      let emailRes = await EmailService.sendPasswordResetEmail(
         userFromDb._id,
         userFromDb.email,
         userFromDb.firstName,
         passwordResetToken
       );
       // send response back to the client
-      return res.json({
-        status: "OK",
-        message: "Password reset email has been sent successfully.",
-      });
+      return res.json(...emailRes);
     } catch (e) {
       return res.json({
         status: "INTERNAL_ERROR",
