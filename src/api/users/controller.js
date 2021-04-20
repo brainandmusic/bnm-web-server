@@ -282,7 +282,7 @@ class UserController {
         passwordResetToken
       );
       // send response back to the client
-      return res.json(...emailRes);
+      return res.json(emailRes);
     } catch (e) {
       return res.json({
         status: "INTERNAL_ERROR",
