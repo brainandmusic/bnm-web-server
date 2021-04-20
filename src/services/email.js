@@ -1,6 +1,18 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 
+/*
+ * For 534-5.7.14 (Invalid login) error,
+ * first check the inbox to see if there is any security alert email. Allow
+ * the access mentioned in the email; second, check if email address and
+ * password are correct; thirdly, check if allow less secure app is turned on;
+ * lastly, follow below link or go to https://g.co/allowaccess  or
+ * https://accounts.google.com/DisplayUnlockCaptcha to allow access and
+ * restart the server again.
+ *
+ * https://support.google.com/accounts/answer/6009563
+ *
+ */
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   host: "smtp.gmail.com",
