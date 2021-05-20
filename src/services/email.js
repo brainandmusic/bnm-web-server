@@ -19,8 +19,11 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // true for 465, false for other ports
   auth: {
-    user: process.env.USER_VERIFY_SENDER_EMAIL, // eslint-disable-line no-undef
-    pass: process.env.USER_VERIFY_SENDER_PWD, // eslint-disable-line no-undef
+    type: "OAuth2",
+    user: process.env.GMAIL_ADDRESS, // eslint-disable-line no-undef
+    clientId: process.env.GMAIL_OAUTH2_CLIENT_ID, // eslint-disable-line no-undef
+    clientSecret: process.env.GMAIL_OAUTH2_CLIENT_SECRET, // eslint-disable-line no-undef
+    refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN, // eslint-disable-line no-undef
   },
 });
 
