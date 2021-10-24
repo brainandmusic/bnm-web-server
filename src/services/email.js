@@ -12,10 +12,13 @@ const nodemailer = require("nodemailer");
  *
  * https://support.google.com/accounts/answer/6009563
  *
+ * If the verification just randomly stopped working
+ * check https://stackoverflow.com/questions/24098461/nodemailer-gmail-what-exactly-is-a-refresh-token-and-how-do-i-get-one
+ * to update the refresh token
  */
 const transporter = nodemailer.createTransport({
   service: "Gmail",
-  host: "smtp.gmail.com",
+  host: process.env.HOST,
   port: 465,
   secure: true, // true for 465, false for other ports
   auth: {
@@ -23,15 +26,15 @@ const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_ADDRESS, // eslint-disable-line no-undef
     clientId: process.env.GMAIL_OAUTH2_CLIENT_ID, // eslint-disable-line no-undef
     clientSecret: process.env.GMAIL_OAUTH2_CLIENT_SECRET, // eslint-disable-line no-undef
-    refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN, // eslint-disable-line no-undef
-  },
+    refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN // eslint-disable-line no-undef
+  }
 });
 
 async function sendPasswordResetEmail(uid, toAddress, toName, token) {
   try {
     // send mail with defined transport object
     let info = await transporter.sendMail({
-      from: '"USC Creative Minds Lab",<uscbnm@gmail.com>', // sender address
+      from: '"USC Creative Minds Lab",<' + process.env.GMAIL_ADDRESS + ">", // sender address
       to: toAddress, // list of receivers
       subject: "Reset your password for USC Creative Minds Lab", // Subject line
       html:
@@ -46,16 +49,16 @@ async function sendPasswordResetEmail(uid, toAddress, toName, token) {
         "/resetpassword/token/" +
         token +
         "'>Reset Password</a>" +
-        "<p>Note: if you didn't initiate this operation, please ignore this email.</p>",
+        "<p>Note: if you didn't initiate this operation, please ignore this email.</p>"
     });
     return {
       status: "OK",
-      message: "Email (id: " + info.messageId + ") sent successfully",
+      message: "Email (id: " + info.messageId + ") sent successfully"
     };
   } catch (e) {
     return {
       status: "UNKNOWN_ERROR",
-      message: "Internal emailing error: " + e,
+      message: "Internal emailing error: " + e
     };
   }
 }
@@ -64,7 +67,7 @@ async function sendVerificationEmail(uid, toAddress, toName, token) {
   try {
     // send mail with defined transport object
     let info = await transporter.sendMail({
-      from: '"USC Creative Minds Lab",uscbnm@gmail.com', // sender address
+      from: '"USC Creative Minds Lab",<' + process.env.GMAIL_ADDRESS + ">", // sender address
       to: toAddress, // list of receivers
       subject: "Verify Email Address for USC Creative Minds Lab", // Subject line
       html:
@@ -79,21 +82,21 @@ async function sendVerificationEmail(uid, toAddress, toName, token) {
         uid +
         "/verify/token/" +
         token +
-        "'>Verify Email</a>", // html body
+        "'>Verify Email</a>" // html body
     });
     return {
       status: "OK",
-      message: "Email (id: " + info.messageId + ") sent successfully",
+      message: "Email (id: " + info.messageId + ") sent successfully"
     };
   } catch (e) {
     return {
       status: "UNKNOWN_ERROR",
-      message: "Internal emailing error: " + e,
+      message: "Internal emailing error: " + e
     };
   }
 }
 
 module.exports = {
   sendPasswordResetEmail,
-  sendVerificationEmail,
+  sendVerificationEmail
 };
