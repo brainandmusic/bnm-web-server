@@ -31,18 +31,17 @@ class UserController {
       // insert new user into database
       userFromDb = await UserService.createUser(userInfo);
       // send verification email
-      await EmailService.sendVerificationEmail(
-        userFromDb._id,
-        userFromDb.email,
-        userFromDb.firstName,
-        userFromDb.emailVerifyToken
-      );
+      // await EmailService.sendVerificationEmail(
+      //   userFromDb._id,
+      //   userFromDb.email,
+      //   userFromDb.firstName,
+      //   userFromDb.emailVerifyToken
+      // );
       // send response back to the client
       return res.json({
         status: "OK",
         result: userFromDb,
-        message:
-          "You account has been created successfully. Please check your email for verifying your account.",
+        message: "You account has been created successfully.",
       });
     } catch (e) {
       return res.json({
@@ -79,21 +78,21 @@ class UserController {
         });
       }
       userFromDb = userFromDb[0];
-      if (!userFromDb.emailVerified) {
-        // user account is not verified, login is not permitted
-        // send verification email
-        await EmailService.sendVerificationEmail(
-          userFromDb._id,
-          userFromDb.email,
-          userFromDb.firstName,
-          userFromDb.emailVerifyToken
-        );
-        return res.json({
-          status: "EMAIL_VERIFY_REQUIRED",
-          message:
-            "We just sent you an email. Please check your inbox and follow the instructions to verify your account before login.",
-        });
-      }
+      // if (!userFromDb.emailVerified) {
+      //   // user account is not verified, login is not permitted
+      //   // send verification email
+      //   await EmailService.sendVerificationEmail(
+      //     userFromDb._id,
+      //     userFromDb.email,
+      //     userFromDb.firstName,
+      //     userFromDb.emailVerifyToken
+      //   );
+      //   return res.json({
+      //     status: "EMAIL_VERIFY_REQUIRED",
+      //     message:
+      //       "We just sent you an email. Please check your inbox and follow the instructions to verify your account before login.",
+      //   });
+      // }
       // check if password matches
       if (!userFromDb.validPassword(password)) {
         return res.json({
@@ -486,8 +485,9 @@ async function checkAdmin(req, res) {
       result: {
         isAdmin: userFromDb.roles.includes("admin"),
       },
-      message: `This user is ${userFromDb.roles.includes("admin") ? "" : "not"
-        } an admin.`,
+      message: `This user is ${
+        userFromDb.roles.includes("admin") ? "" : "not"
+      } an admin.`,
     });
   } catch (e) {
     return res.json({
